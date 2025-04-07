@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button, Card } from "react-bootstrap";
+import Multiselect from 'multiselect-react-dropdown';
 
 function GenericForm({
   fields,
@@ -8,7 +9,7 @@ function GenericForm({
   cardLabel = "טופס",
 }) {
   const [errors, setErrors] = useState({});
-  
+
   const initialData = {};
   fields.forEach((field) => {
     initialData[field.name] = field.type === "select-multiple" ? [] : "";
@@ -72,36 +73,45 @@ function GenericForm({
       dir="rtl"
       style={{ maxWidth: "600px", margin: "30px auto", borderRadius: "15px" }}
     >
-        
       <h3 className="mb-4 text-center">{cardLabel}</h3>
       <Form onSubmit={handleSubmit}>
         {fields.map((field, index) => (
           <Form.Group className="mb-3" controlId={field.name} key={index}>
             <Form.Label className="fw-bold">{field.label}</Form.Label>
-
             {field.type === "select-multiple" ? (
-              <Form.Select
-                multiple
-                name={field.name}
-                onChange={handleChange}
-                isInvalid={!!errors[field.name]}
-              >
-                {field.options.map((opt, i) => (
-                  <option key={i} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </Form.Select>
-            ) : (
-              <Form.Control
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                onChange={handleChange}
-                isInvalid={!!errors[field.name]}
+            <>
+              <Multiselect
+                options={field.options}
+                displayValue="label"
+                onSelect={(selectedList) => {
+                  const values = selectedList.map((item) => item.value);
+                  const error = validateField(field.name, values);
+                  setFormData((prev) => ({ ...prev, [field.name]: values }));
+                  setErrors((prev) => ({ ...prev, [field.name]: error }));
+                }}
+                onRemove={(selectedList) => {
+                  const values = selectedList.map((item) => item.value);
+                  const error = validateField(field.name, values);
+                  setFormData((prev) => ({ ...prev, [field.name]: values }));
+                  setErrors((prev) => ({ ...prev, [field.name]: error }));
+                }}
+                className="form-control"
               />
+              {errors[field.name] && (
+                <div className="invalid-feedback d-block">
+                  {errors[field.name]}
+                </div>
+              )}
+            </>
+            ) : (
+            <Form.Control
+              type={field.type}
+              name={field.name}
+              placeholder={field.placeholder}
+              onChange={handleChange}
+              isInvalid={!!errors[field.name]}
+            />
             )}
-
             <Form.Control.Feedback type="invalid">
               {errors[field.name]}
             </Form.Control.Feedback>

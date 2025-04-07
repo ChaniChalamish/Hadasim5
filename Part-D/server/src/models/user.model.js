@@ -47,13 +47,7 @@ const userSchema = new Schema(
         return this.role === "supplier";
       },
     },
-    goods: {
-      type: [String],
-      required: function () {
-        return this.role === "supplier";
-      },
-      default: [],
-    },
+  
   },
 
   {
@@ -69,7 +63,7 @@ userSchema.pre("save", function (next) {
 });
 
 userSchema.methods.comparePassword = async function (enterPassword) {
-  return bcrypt.compareSync(enterPassword, this.password);
+  return  bcrypt.compareSync(enterPassword, this.password);
 };
 
 userSchema.methods.jwtToken = function () {
@@ -78,7 +72,14 @@ userSchema.methods.jwtToken = function () {
     expiresIn: "1h",
   });
 };
-
+// userSchema.static.findByToken = function (token) {
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     return this.findOne({ _id: decoded._id });
+//   } catch (err) {
+//     throw new Error(`Error verifying token: ${err.message}`);
+//   }
+// };
 const User = model("User", userSchema);
 
 module.exports = User;

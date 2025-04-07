@@ -1,81 +1,101 @@
-// controllers/user.controller.js
-const User = require('../models/user.model')
 const {
   validateUserSignup,
   validateUserLogin,
-} = require('../validators/user.validator')
+} = require("../validators/user.validator");
+const {
+  createUserService,
+  loginUserService,
+  getUserProfileService,
+} = require("../services/user.service");
+const { validateProduct, productArraySchema } = require("../validators/product.validator");
 
 exports.createUser = async (req, res) => {
   try {
-    const { err } = validateUserSignup(req.body) // Validate the information from the request body
-    if (err) return res.status(400).json({ message: err.message })
-    const userExist = await User.findOne({ email: req.body.email }) // Checking if the user exist
-    if (userExist) return res.status(400).json({ message: 'User exist' })
-    const { name, email, password, role } = req.body
-    const user = await User.create({ name, email, password, role }) //Creating the user
-    if (!user) return res.status(400).json({ message: 'Cannot create user' })
+    const { err } = validateUserSignup(req.body);
+    if (err) return res.status(400).json({ message: err.message });
+    console.log(req.body.products);
+    const {
+      name,
+      email,
+      password,
+      role,
+      companyName,
+      phoneNumber,
+      representativeName,
+      products = [],
+    } = req.body;
 
-    const token = await user.jwtToken()
-
-    const options = {
-      expiresIn: 3000,
-      httpOnly: true,
+    if (role === "supplier") {
+      try {
+        await productArraySchema.validateAsync(products);
+      } catch (validationError) {
+        return res.status(400).json({ message: `err in validate items: ${validationError.message}` });
+      }
     }
 
-    return res.status(200).cookies('token', token, options).json({
-      message: 'Signup successful',
+    
+    const { token } = await createUserService({
+      name,
+      email,
+      password,
+      role,
+      companyName,
+      phoneNumber,
+      representativeName,
+      products,
+    });
+
+    const options = {
+      httpOnly: true,
+      expiresIn: 3000,
+    };
+
+    return res.status(200).cookie("token", token, options).json({
+      message: "Signup successful",
       token,
-    })
+    });
   } catch (error) {
-    console.log('Unable to create a User')
+    return res.status(400).json({ message: error.message });
   }
-}
+};
 
 exports.loginUser = async (req, res) => {
   try {
-    const { err } = validateUserLogin(req.body)
-    if (err) return res.status(400).json({ message: err.message }) // Validate the users input
+    console.log(req.body);
 
-    // find the email of the user
-    const user = await User.findOne({ email: req.body.email }).select(
-      '+password'
-    )
-    // console.log(user)
+    const { err } = validateUserLogin(req.body);
+    if (err) return res.status(400).json({ message: err.message });
 
-    const isMatched = await user.comparePassword(req.body.password)
-    if (!isMatched)
-      return res.status(400).json({ message: 'Incorrect password or email' })
+    const { email, password } = req.body;
+    const { token } = await loginUserService({ email, password });
 
-    const token = await user.jwtToken()
+    const options = { httpOnly: true };
 
-    const options = {
-      httpOnly: true,
-    }
-
-    return res.status(200).cookie('token', token, options).json({
-      message: 'Login successful',
+    return res.status(200).cookie("token", token, options).json({
+      message: "Login successful",
       token,
-    })
+    });
   } catch (error) {
-    console.log(error.message)
+    return res.status(400).json({ message: error.message });
   }
-}
+};
 
-exports.userProfile = async (req, res, next) => {
-  const user = await User.findById(req.user.id)
-  if (!user) return res.status(200).json({ message: 'User not found' })
-  return res.status(200).json({ message: 'Successfully', data: user })
-}
+exports.userProfile = async (req, res) => {
+  try {
+    const user = await getUserProfileService(req.user.id);
+    return res.status(200).json({ message: "Success", data: user });
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
+};
 
 exports.logOut = async (req, res) => {
   try {
-    res.cookie('token', 'none', {
-      expires: new Date(Date.now()),
-    })
+    res.cookie("token", "none", { expires: new Date(Date.now()) });
     return res
       .status(200)
-      .json({ success: true, message: 'User is logout successfully' })
+      .json({ success: true, message: "User logged out successfully" });
   } catch (error) {
-    console.log(error.message)
+    return res.status(500).json({ message: error.message });
   }
-}
+};

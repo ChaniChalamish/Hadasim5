@@ -3,17 +3,17 @@ const Joi = require('joi')
 const userSignUp = Joi.object({
   name: Joi.string().min(4).max(60).required(),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net','yahoo'] } })
     .required(),
   password: Joi.string()
-    .pattern(
-      new RegExp(
-        /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!#.])[A-Za-z\d$@$#!%*?&.]{8,40}/
-      ),
-      {
-        name: 'At least one uppercase, one lowercase, one special character, and minimum of 8 and maximum of 40 characters',
-      }
-    )
+    // .pattern(
+    //   new RegExp(
+    //     /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!#.])[A-Za-z\d$@$#!%*?&.]{8,40}/
+    //   ),
+    //   {
+    //     name: 'At least one uppercase, one lowercase, one special character, and minimum of 8 and maximum of 40 characters',
+    //   }
+    // )
     .required(),
   role: Joi.string().valid('user', 'supplier', 'admin').required(),
 })
@@ -23,19 +23,19 @@ const loginUser = Joi.object({
     .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
     .required(),
   password: Joi.string()
-    .pattern(
-      new RegExp(
-        /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!#.])[A-Za-z\d$@$#!%*?&.]{8,40}/
-      ),
-      {
-        name: 'At least one uppercase, one lowercase, one special character, and minimum of 8 and maximum of 40 characters',
-      }
-    )
+    // .pattern(
+    //   new RegExp(
+    //     /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!#.])[A-Za-z\d$@$#!%*?&.]{8,40}/
+    //   ),
+    //   {
+    //     name: 'At least one uppercase, one lowercase, one special character, and minimum of 8 and maximum of 40 characters',
+    //   }
+    // )
     .required(),
 })
 
 exports.validateUserSignup = (data) => {
-  const { err, value } = userSignUp.validateAsync(data)
+  const { err, value } = userSignUp.validateAsync(data, { allowUnknown: true })
   return { err: err, value }
 }
 

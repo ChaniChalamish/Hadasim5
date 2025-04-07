@@ -1,5 +1,5 @@
 const express = require('express')
-const { connectDB } = require('./src/config/database')
+const {connectDB} = require('./src/config/database');
 const errorMiddlware = require("./src/middlewares/error");
 const cors = require("cors");
 
@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser')
 const PORT = process.env.PORT
 const HOST_NAME = process.env.HOST_NAME
 // Instantiating the mongodb database
-connectDB()
+connectDB();
 
 // Instantiating the express application
 

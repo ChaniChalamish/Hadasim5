@@ -2,3 +2,4 @@
 .idea
 Part-D/erver/package-lock.json
 Part-D/server/node_modules
+Part-D/server/.env
