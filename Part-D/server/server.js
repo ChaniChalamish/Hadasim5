@@ -1,10 +1,10 @@
 const express = require('express')
-const { connectDB } = require('../src/config/database')
-const errorMiddlware = require("../src/middlewares/error");
+const { connectDB } = require('./src/config/database')
+const errorMiddlware = require("./src/middlewares/error");
 const cors = require("cors");
 
 const dotenv = require('dotenv').config()
-const logger = require("../src/config/logger");
+const logger = require("./src/config/logger");
 const cookieParser = require('cookie-parser')
 const PORT = process.env.PORT
 const HOST_NAME = process.env.HOST_NAME
@@ -22,7 +22,7 @@ server.get('/', (req, res) => {
   })
 
 // Importing our routes
-const user = require('../src/routes/user.routes')
+const user = require('./src/routes/user.routes')
 
 // Express Inbuilt middleware
 
