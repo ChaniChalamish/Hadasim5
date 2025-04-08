@@ -68,8 +68,8 @@ userSchema.methods.comparePassword = async function (enterPassword) {
 
 userSchema.methods.jwtToken = function () {
   const user = this;
-  return jwt.sign({ id: user._id }, "random string", {
-    expiresIn: "1h",
+  return jwt.sign({ id: user._id,role: user.role}, "random string", {
+    expiresIn: "12h",
   });
 };
 // userSchema.static.findByToken = function (token) {

@@ -1,21 +1,22 @@
 const productService = require("../services/product.service");
 const getSuppliersProducts = async (req, res) => {
   try {
-    const supplierId = req.user.id;
+
+    const supplierId = req.params.id;
     console.log("getSuppliersProducts", supplierId);
 
-    // if (req.user.role !== "supplier") {
-    //   const error = new Error("not authorized as a supplier");
-    //   error.statusCode = 403;
-    //   return next(error);
-    // }
+    if (req.user.role !== "admin") {
+      const error = new Error("not authorized as a admin");
+      error.statusCode = 403;
+      return next(error);
+    }
 
-    const orders = await productService.getProductBySupplier(supplierId);
+    const products = await productService.getProductBySupplier(supplierId);
 
     return res.status(200).json({
       success: true,
-      count: orders.length,
-      orders,
+      count: products.length,
+      products,
     });
   } catch (error) {
     console.error(" error in getSuppliersProducts", error.message);

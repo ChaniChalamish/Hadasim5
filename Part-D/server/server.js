@@ -32,7 +32,7 @@ server.use(express.urlencoded({ extended: false })) // Used in passing form
 server.use(cookieParser()) // Used in setting the cookies parser
 
 // Routes for API
-
+server.use(errorMiddlware);
 server.use('/api', user)
 server.use(errorMiddlware); // Error handling middleware
 

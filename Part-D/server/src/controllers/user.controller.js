@@ -6,8 +6,11 @@ const {
   createUserService,
   loginUserService,
   getUserProfileService,
+  getSuppliersService
 } = require("../services/user.service");
-const { validateProduct, productArraySchema } = require("../validators/product.validator");
+const {
+  productArraySchema,
+} = require("../validators/product.validator");
 
 exports.createUser = async (req, res) => {
   try {
@@ -29,11 +32,12 @@ exports.createUser = async (req, res) => {
       try {
         await productArraySchema.validateAsync(products);
       } catch (validationError) {
-        return res.status(400).json({ message: `err in validate items: ${validationError.message}` });
+        return res.status(400).json({
+          message: `err in validate items: ${validationError.message}`,
+        });
       }
     }
 
-    
     const { token } = await createUserService({
       name,
       email,
@@ -58,15 +62,23 @@ exports.createUser = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
+exports.getSuppliers=async (req, res) => {
+  try {
+    const suppliers = await getSuppliersService();
+    return res.status(200).json({ message: "Success", data: suppliers });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 exports.loginUser = async (req, res) => {
   try {
     console.log(req.body);
 
     const { err } = validateUserLogin(req.body);
-    
+
     if (err) return res.status(400).json({ message: err.message });
-    console.log(err)
+    console.log(err);
     const { email, password } = req.body;
     const { token } = await loginUserService({ email, password });
 

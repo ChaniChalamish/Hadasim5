@@ -38,7 +38,13 @@ exports.createUserService = async (userData) => {
     
     return { user, token };
   };
-
+exports.getSuppliersService=async () => {
+  const suppliers = await User.find({ role: "supplier" });
+  if (!suppliers) {
+    throw new Error('No suppliers found');
+  }
+  return suppliers;
+}
 exports.loginUserService = async ({ email, password }) => {
   const user = await User.findOne({ email }).select('+password');
   if (!user) {
