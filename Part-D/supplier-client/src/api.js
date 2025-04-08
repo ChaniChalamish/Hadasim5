@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api', // כתובת השרת שלך
+  baseURL: 'http://localhost:8080/api', // כתובת השרת שלך
 })
 
 // הוספת טוקן לאימות

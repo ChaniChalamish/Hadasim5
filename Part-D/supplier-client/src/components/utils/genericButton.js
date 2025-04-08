@@ -1,12 +1,11 @@
-import React from 'react';
-import { Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap'
 
-function GenericButton({ text, onClick, variant = 'primary' }) {
+function GenericButton({ label, variant = 'primary', onClick }) {
   return (
     <Button variant={variant} onClick={onClick}>
-      {text}
+      {label}
     </Button>
-  );
+  )
 }
 
-export default GenericButton;
+export default GenericButton

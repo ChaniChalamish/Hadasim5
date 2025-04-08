@@ -1,14 +1,36 @@
-import React from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { Card} from 'react-bootstrap'
+import { useState } from 'react'
 
-function GenericList({ items }) {
+function GenericList({ title, data, renderSummary, renderDetails }) {
+  const [openItems, setOpenItems] = useState({})
+
+  const toggleOpen = (id) => {
+    setOpenItems((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
   return (
-    <ListGroup>
-      {items.map((item, index) => (
-        <ListGroup.Item key={index}>{item}</ListGroup.Item>
-      ))}
-    </ListGroup>
-  );
+    <div style={{ direction: 'rtl', padding: '20px' }}>
+      <h2>{title}</h2>
+      {data.length === 0 ? (
+        <p>no data to display</p>
+      ) : (
+        data.map((item) => (
+          <Card key={item._id} className="mb-3 p-3 shadow-sm">
+            <div
+              onClick={() => toggleOpen(item._id)}
+              style={{ cursor: 'pointer' }}
+            >
+              {renderSummary(item)}
+            </div>
+
+            {openItems[item._id] && (
+              <div className="mt-3">{renderDetails(item)}</div>
+            )}
+          </Card>
+        ))
+      )}
+    </div>
+  )
 }
 
-export default GenericList;
+export default GenericList

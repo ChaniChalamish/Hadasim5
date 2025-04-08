@@ -64,8 +64,9 @@ exports.loginUser = async (req, res) => {
     console.log(req.body);
 
     const { err } = validateUserLogin(req.body);
+    
     if (err) return res.status(400).json({ message: err.message });
-
+    console.log(err)
     const { email, password } = req.body;
     const { token } = await loginUserService({ email, password });
 

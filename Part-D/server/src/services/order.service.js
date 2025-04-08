@@ -2,20 +2,15 @@ const Order = require("../models/order.model");
 const Product = require("../models/product.model");
 const User = require("../models/user.model");
 
-
 const createOrderService = async (grocerId, supplierId, products) => {
-  
   let totalOrderPrice = 0;
   const populatedProducts = [];
-  
-  for (const item of products) {
-    
-  
 
+  for (const item of products) {
     const pricePerItem = item.price;
     const quantity = item.quantity;
     const totalPrice = quantity * pricePerItem;
-     
+
     populatedProducts.push({
       productId: item._id,
       productName: item.name,
@@ -69,7 +64,7 @@ const getPendingOrders = async () => {
   try {
     // Get all pending and in progress orders.
     const orders = await Order.find({
-       $or: [{ status: "pending" }, { status: "in progress" }] ,
+      $or: [{ status: "pending" }, { status: "in progress" }],
     })
       .populate({
         path: "products.productId", // this will populate each product in the order items
@@ -87,7 +82,8 @@ const getPendingOrdersById = async (supplierId) => {
     const orders = await Order.find({
       $and: [
         { supplierId }, // get orders where supplierId is the current user and the order date is in the future.{
-          { $or: [{ status: "pending" }, { status: "in progress" }] }      ],
+        { $or: [{ status: "pending" }, { status: "in progress" }] },
+      ],
     })
       .populate({
         path: "products.productId", // this will populate each product in the order items
@@ -99,8 +95,12 @@ const getPendingOrdersById = async (supplierId) => {
     throw new Error(`err when getting pending orders :${error.message}`);
   }
 };
-const updateOrderStatus = async (orderId, status) => {
+const updateOrderStatus = async (orderId, role) => {
   try {
+    let status; // Set the status based on the role of the user who is updating the order.
+    if (role === "supplier") {
+      status = "in progress";
+    } else status = "Done";
     const order = await Order.findByIdAndUpdate(
       orderId,
       { status },

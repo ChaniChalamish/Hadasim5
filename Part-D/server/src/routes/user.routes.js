@@ -17,11 +17,11 @@ const router = express.Router();
 
 // Routes created
 
-router.post("/register", createUser);
-router.post("/login", loginUser);
+router.post("/auth/register", createUser);
+router.post("/auth/login", loginUser);
 router.get("/products",isAuthenticated, getSuppliersProducts);
-router.get("/orders", getSupplierOrders);
-router.put("/orders/:id/status", updateOrderStatus);
+router.get("/orders", isAuthenticated,getSupplierOrders);
+router.put("/orders/:id", isAuthenticated,updateOrderStatus);
 router.post("/orders", isAuthenticated, createOrder);
 // Routes protected by JWT
 router.get("/me", isAuthenticated, userProfile);

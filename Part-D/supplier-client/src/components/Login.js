@@ -1,6 +1,8 @@
 import GenericForm from "../components/utils/genericForm";
-
+import API from '../api'
+import { useNavigate } from 'react-router-dom'
 const Login = () => {
+  const navigate = useNavigate()
   const fields = [
     {
       name: "email",
@@ -25,15 +27,25 @@ const Login = () => {
       required: true,
       minLength: 6,
     },
-    roles: {
-      required: true,
-    },
+    
   };
 
-  const handleSubmit = (data) => {
-    console.log("Submitted form data:", data);
-  };
+  const handleSubmit = async (data) => {
+    try {
+      const res = await API.post('/auth/login', data)
+      console.log(data)
+      console.log('Login successful:', res.data)
+      const token = res.data.token
+      localStorage.setItem('token', token)
 
+      alert('התחברת בהצלחה!')
+      navigate('/orders') // העברה לדף אחר אחרי התחברות
+
+    } catch (err) {
+      console.error('Login error:', err.response || err)
+      alert('שגיאה בהתחברות: אימייל או סיסמה שגויים')
+    }
+  }
   return (
     <div style={{ maxWidth: "500px", margin: "0 auto" }}>
       <GenericForm

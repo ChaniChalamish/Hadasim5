@@ -25,13 +25,14 @@ const createOrder = async (req, res) => {
 
 const getSupplierOrders = async (req, res) => {
   try {
+    console.log("Getting supplier orders for user:", req.user.id);
     const supplierId = req.user.id;
 
-    // if (req.user.role !== "supplier") {
-    //   const error = new Error("not authorized as a supplier");
-    //   error.statusCode = 403;
-    //   return next(error);
-    // }
+    if (req.user.role !== "supplier") {
+      const error = new Error("not authorized as a supplier");
+      error.statusCode = 403;
+      return next(error);
+    }
 
     const orders = await orderService.getOrdersBySupplierId(supplierId);
 
@@ -87,11 +88,14 @@ const getPendingOrders = async (req, res, next) => {
 };
 const updateOrderStatus = async (req, res, next) => {
   try {
+    
+       
+  
     const orderId = req.params.id;
-    const newStatus = req.body.status;
+  
     const updatedOrder = await orderService.updateOrderStatus(
       orderId,
-      newStatus
+      req.user.role
     );
     return res.status(200).json({
       success: true,

@@ -1,25 +1,26 @@
-import React from 'react';
-import { Table } from 'react-bootstrap';
+import { Table } from 'react-bootstrap'
 
-const GenericTable = ({ data }) => {
+function GenericTable({ columns, data }) {
   return (
     <Table striped bordered hover>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Data</th>
+          {columns.map((col, idx) => (
+            <th key={idx}>{col.header}</th>
+          ))}
         </tr>
       </thead>
       <tbody>
-        {data.map((row, index) => (
-          <tr key={index}>
-            <td>{index + 1}</td>
-            <td>{row}</td>
+        {data.map((row, idx) => (
+          <tr key={idx}>
+            {columns.map((col, cidx) => (
+              <td key={cidx}>{col.accessor(row)}</td>
+            ))}
           </tr>
         ))}
       </tbody>
     </Table>
-  );
-};
+  )
+}
 
-export default GenericTable;
+export default GenericTable
