@@ -17,7 +17,7 @@ const orderSchema = new Schema(
       ref: "User", // grocer id
       required: true,
     },
-    items: [
+    products: [
       {
         productId: {
           type: String,
@@ -42,6 +42,7 @@ const orderSchema = new Schema(
           required: true,
         },
       },
+
     ],
 
     status: {
@@ -49,6 +50,11 @@ const orderSchema = new Schema(
       enum: [ "pending", "in progress","Done"],
       default: "pending",
     },
+    totalOrderPrice:{
+      type: Number,
+      required: true,
+      default: 0,
+    }
   },
   {
     timestamps: true,

@@ -1,10 +1,10 @@
 const Joi = require("joi");
 
 const orderItemSchema = Joi.object({
-  productId: Joi.string().required().messages({
+  _id: Joi.string().required().messages({
     "any.required": "מזהה מוצר נדרש",
   }),
-  productName: Joi.string().min(1).required().messages({
+  name: Joi.string().min(1).required().messages({
     "string.empty": "שם המוצר נדרש",
     "any.required": "יש לספק שם מוצר",
   }),
@@ -13,37 +13,27 @@ const orderItemSchema = Joi.object({
     "number.min": "הכמות חייבת להיות לפחות 1",
     "any.required": "יש לציין כמות",
   }),
-  pricePerItem: Joi.number().min(0).required().messages({
+  price: Joi.number().min(0).required().messages({
     "number.base": "המחיר ליחידה חייב להיות מספר",
     "number.min": "המחיר חייב להיות חיובי",
     "any.required": "יש לציין מחיר ליחידה",
   }),
-  totalPrice: Joi.number().min(0).required().messages({
-    "number.base": "המחיר הכולל חייב להיות מספר",
-    "number.min": "המחיר הכולל חייב להיות חיובי",
-    "any.required": "יש לציין מחיר כולל",
-  }),
+  
 });
 
 const orderSchema = Joi.object({
   supplierId: Joi.string().required().messages({
-    "any.required": "יש לצרף מזהה ספק",
+    "any.required":"must have a supplierId",
   }),
-  items: Joi.array().items(orderItemSchema).min(1).required().messages({
-    "array.base": "שדה הפריטים חייב להיות מערך",
-    "array.min": "יש לכלול לפחות פריט אחד בהזמנה",
-    "any.required": "שדה הפריטים נדרש",
+  products: Joi.array().items(orderItemSchema).min(1).required().messages({
+    "array.base": "products must be an array",
+    "array.min": "must have at least one product",
+    "any.required": "",
   }),
-  status: Joi.string()
-    .valid("ממתינה", "בתהליך", "הושלמה")
-    .default("ממתינה")
-    .messages({
-      "any.only": "הסטטוס חייב להיות אחד מהבאים: ממתינה, בתהליך, הושלמה",
-    }),
 });
 
 exports.validateOrder = (data) => {
-    const { err, value } = productSchema.validateAsync(data);
+    const { err, value } = orderSchema.validateAsync(data);
     return { err: err, value };
   };
 

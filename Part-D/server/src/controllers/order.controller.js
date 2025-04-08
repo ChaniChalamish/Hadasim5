@@ -1,66 +1,69 @@
 const orderService = require("../services/order.service");
-const createOrder = async (req, res, next) => {
+const { validateOrder } = require("../validators/order.validator");
+const createOrder = async (req, res) => {
   try {
-    const { supplierId, grocerId, products } = req.body;
-    const order = await orderService.createOrder({
-      supplierId,
-      grocerId,
-      products,
-    });
-    res.status(201).json({
-      success: true,
+    console.log("Creating order:", req.body);
+    const { error } = validateOrder(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const grocerId = req.user.id; // Assuming you have auth middleware setting req.user
+    const { supplierId, products } = req.body;
+    
+    const order = await orderService.createOrderService(grocerId, supplierId, products);
+
+    return res.status(201).json({
       message: "Order created successfully",
       order,
     });
-  } catch (error) {
-    console.error("Error in createOrder:", error.message);
-    error.statusCode = 500;
-    next(error);
+  } catch (err) {
+    console.error("Order creation failed:", err.message);
+    return res.status(500).json({ message: err.message });
   }
 };
-const getSupplierOrders = async (req, res, next) => {
+
+const getSupplierOrders = async (req, res) => {
   try {
     const supplierId = req.user.id;
 
-    if (req.user.role !== "supplier") {
-      const error = new Error("not authorized as a supplier");
-      error.statusCode = 403;
-      return next(error);
-    }
+    // if (req.user.role !== "supplier") {
+    //   const error = new Error("not authorized as a supplier");
+    //   error.statusCode = 403;
+    //   return next(error);
+    // }
 
     const orders = await orderService.getOrdersBySupplierId(supplierId);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Error in getSupplierOrders:", error.message);
-    error.statusCode = 500;
-    next(error);
+    return res.status(500).json({ message: error.message });
   }
 };
-const getallOrders = async (req, res, next) => {
+const getallOrders = async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
-      const error = new Error("not authorized as a admin");
-      error.statusCode = 403;
-      return next(error);
-    }
+    // if (req.user.role !== "admin") {
+    //   const error = new Error("not authorized as a admin");
+    //   error.statusCode = 403;
+    //   return next(error);
+    // }
     const grocerId = req.user.id;
 
     const orders = await orderService.getOrdersByGrocerId(grocerId);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Error in getGrocerrOrders:", error.message);
-    error.statusCode = 500;
-    next(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 const getPendingOrders = async (req, res, next) => {
@@ -72,15 +75,14 @@ const getPendingOrders = async (req, res, next) => {
     // }
     // const grocerId = req.user.id;
     const orders = await orderService.getPendingOrders();
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: orders.length,
       orders,
     });
   } catch (error) {
     console.error("Error in getPendingOrders:", error.message);
-    error.statusCode = 500;
-    next(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 const updateOrderStatus = async (req, res, next) => {
@@ -91,15 +93,14 @@ const updateOrderStatus = async (req, res, next) => {
       orderId,
       newStatus
     );
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Order status updated successfully",
       updatedOrder,
     });
   } catch (error) {
     console.error("Error in updateOrderStatus:", error.message);
-    error.statusCode = 500;
-    next(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -109,5 +110,4 @@ module.exports = {
   getallOrders,
   getPendingOrders,
   updateOrderStatus,
-
 };

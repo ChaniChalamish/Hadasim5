@@ -1,19 +1,52 @@
 const Order = require("../models/order.model");
+const Product = require("../models/product.model");
+const User = require("../models/user.model");
 
-const createOrder = async (order) => {
-  try {
-    const newOrder = await Order.create(order);
-    return newOrder;
-  } catch (error) {
-    throw new Error(`Error creating new order: ${error.message}`);
+
+const createOrderService = async (grocerId, supplierId, products) => {
+  
+  let totalOrderPrice = 0;
+  const populatedProducts = [];
+  
+  for (const item of products) {
+    
+  
+
+    const pricePerItem = item.price;
+    const quantity = item.quantity;
+    const totalPrice = quantity * pricePerItem;
+     
+    populatedProducts.push({
+      productId: item._id,
+      productName: item.name,
+      quantity,
+      pricePerItem,
+      totalPrice,
+    });
+
+    totalOrderPrice += totalPrice;
   }
+
+  const order = await Order.create({
+    grocerId,
+    supplierId,
+    products: populatedProducts,
+    totalOrderPrice,
+  });
+
+  return order;
 };
 
 // Get orders by supplierId
 
 const getOrdersBySupplierId = async (supplierId) => {
   try {
-    const orders = await Order.find({ supplierId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ supplierId })
+      .populate({
+        path: "products.productId", // this will populate each product in the order items
+        model: "Product", // name of the model
+      })
+      .sort({ createdAt: -1 });
     return orders;
   } catch (error) {
     throw new Error(`err when getting orders by supplierId:${error.message}`);
@@ -21,7 +54,12 @@ const getOrdersBySupplierId = async (supplierId) => {
 };
 const getAllOrders = async (grocerId) => {
   try {
-    const orders = await Order.find({ grocerId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ grocerId })
+      .populate({
+        path: "products.productId", // this will populate each product in the order items
+        model: "Product", // name of the model
+      })
+      .sort({ createdAt: -1 });
     return orders;
   } catch (error) {
     throw new Error(`err when getting orders by grocerId:${error.message}`);
@@ -31,14 +69,36 @@ const getPendingOrders = async () => {
   try {
     // Get all pending and in progress orders.
     const orders = await Order.find({
-      status: { $in: ["pending", "in progress"] },
-    }).sort({ createdAt: -1 });
+       $or: [{ status: "pending" }, { status: "in progress" }] ,
+    })
+      .populate({
+        path: "products.productId", // this will populate each product in the order items
+        model: "Product", // name of the model
+      })
+      .sort({ createdAt: -1 });
     return orders;
   } catch (error) {
     throw new Error(`err when getting pending orders :${error.message}`);
   }
 };
-
+const getPendingOrdersById = async (supplierId) => {
+  try {
+    // Get all pending and in progress orders.
+    const orders = await Order.find({
+      $and: [
+        { supplierId }, // get orders where supplierId is the current user and the order date is in the future.{
+          { $or: [{ status: "pending" }, { status: "in progress" }] }      ],
+    })
+      .populate({
+        path: "products.productId", // this will populate each product in the order items
+        model: "Product", // name of the model
+      })
+      .sort({ createdAt: -1 });
+    return orders;
+  } catch (error) {
+    throw new Error(`err when getting pending orders :${error.message}`);
+  }
+};
 const updateOrderStatus = async (orderId, status) => {
   try {
     const order = await Order.findByIdAndUpdate(
@@ -53,7 +113,7 @@ const updateOrderStatus = async (orderId, status) => {
 };
 
 module.exports = {
-  createOrder,
+  createOrderService,
   getOrdersBySupplierId,
   getAllOrders,
   updateOrderStatus,
